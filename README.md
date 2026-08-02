@@ -97,6 +97,21 @@ própria conta do Supabase, não numa tabela à parte: nascem com o usuário, vi
 com a sessão e não pedem migração de banco. O nome da casa é o que aparece no
 topo do app — nada de nome escrito no código.
 
+## Segurança do site publicado
+
+`vercel.json` define os cabeçalhos. O mais importante é o **CSP**: o app só pode
+falar com ele mesmo e com o Supabase. Com `connect-src` fechado, um script
+injetado não consegue mandar os seus dados para outro lugar. Junto vão HSTS,
+`nosniff`, `frame-ancestors: none` (contra clickjacking) e Permissions-Policy
+bloqueando câmera, microfone e localização.
+
+O arquivo é JSON validado por schema — **não aceita campos extras**, nem um
+`comment`. Se precisar explicar alguma regra, é aqui, não lá.
+
+O endpoint `/api/nfce` é público. Ele só aceita endereços de `fazenda.sp.gov.br`,
+não segue redirecionamento (senão a checagem de domínio viraria decoração), tem
+prazo de 15s e teto de 2 MB.
+
 ## Aparência
 
 Tema claro, escuro ou seguindo o sistema, no cabeçalho e na aba Conta. O tema é
