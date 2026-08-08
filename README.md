@@ -48,6 +48,7 @@ chaves — todo o resto depende de estar autenticado.
 | Documento | Para quê |
 |---|---|
 | [CONTEXTO-DO-PROJETO.md](CONTEXTO-DO-PROJETO.md) | visão do produto e regras de negócio, para quem chega agora |
+| [PROMPT-PARA-IA.md](PROMPT-PARA-IA.md) | arquétipo e prompt para quem for reconstruir o projeto |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | o ciclo de trabalho e as regras do domínio |
 | [docs/arquitetura.md](docs/arquitetura.md) | como funciona por dentro e por que assim |
 | [docs/operacao.md](docs/operacao.md) | serviços, ambientes, deploy, segurança |
