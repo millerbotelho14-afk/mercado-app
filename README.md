@@ -8,10 +8,58 @@ de verdade — os dados ficam num banco no aparelho, não mais fixos dentro do H
 
 ```bash
 npm install
+cp .env.example .env.local   # preencha com as chaves do Supabase
 npm run dev
 ```
 
-Abre em <http://localhost:5180>.
+Abre em <http://localhost:5180> (e na rede local, para testar no celular).
+
+Sem as variáveis do Supabase o app sobe, mas a tela de login avisa que faltam as
+chaves — todo o resto depende de estar autenticado.
+
+## Para quem for assumir o projeto
+
+**Serviços envolvidos.** Três, todos no plano gratuito:
+
+| Serviço | Papel | Onde |
+|---|---|---|
+| Vercel | hospeda o site e a função `/api/nfce` | projeto `rellim/mercado-app` |
+| Supabase | contas, banco na nuvem para a sincronia | projeto `tpttfhkmuneecflsncja` |
+| SEFAZ-SP | fonte das notas fiscais (consulta pública) | sem cadastro |
+
+**O que precisa estar configurado:**
+
+1. `.env.local` com `VITE_SUPABASE_URL` e `VITE_SUPABASE_KEY` (veja `.env.example`).
+2. As mesmas duas variáveis na Vercel, em *Settings → Environment Variables*.
+3. O `supabase/schema.sql` rodado uma vez no SQL Editor do Supabase (tabelas,
+   índices, triggers e as políticas de RLS).
+4. Em *Authentication → URL Configuration*, a URL de produção em **Site URL** e
+   **Redirect URLs**, senão o link de confirmação de e-mail aponta para
+   `localhost`.
+
+**Deploy:**
+
+```bash
+npx vercel deploy --prod --yes
+```
+
+**Onde o estado vive.** Não há servidor de aplicação: o app é estático e fala
+direto com o Supabase pelo navegador. Quem garante que ninguém lê os dados de
+outro é o RLS (`auth.uid() = user_id`), não o código do cliente — qualquer
+mudança de schema precisa manter as políticas. A única peça de servidor é
+`api/nfce.ts`, que existe só porque a SEFAZ não manda cabeçalho CORS.
+
+**Dívidas conhecidas:**
+
+- Não há testes automatizados. As verificações desta fase foram manuais.
+- O bundle passa de 900 KB, quase todo Recharts. Trocar por SVG próprio nos dois
+  gráficos derrubaria isso bem.
+- `/api/nfce` é aberto: limitado ao domínio da SEFAZ, mas sem exigir sessão nem
+  limite de requisições por origem.
+- O parser de desconto da nota foi escrito olhando o padrão da página, mas nunca
+  foi exercitado numa nota que tivesse desconto.
+- A confirmação de e-mail usa o remetente padrão do Supabase, que é limitado e
+  documentado como só para testes. Para vários usuários, configurar SMTP próprio.
 
 Para gerar a versão de produção (é ela que vira o app instalável):
 
