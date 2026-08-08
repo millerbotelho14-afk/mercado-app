@@ -2,6 +2,26 @@
 
 Serviços, ambientes, deploy e segurança do que está no ar.
 
+## Os três ambientes
+
+Cada um com o seu banco. É isso que permite testar sem risco.
+
+| Ambiente | Como sobe | Banco Supabase | Quem usa |
+|---|---|---|---|
+| Local | `npm run dev` | teste (`hsmwaqpgxzqypzaiqewu`) | você, desenvolvendo |
+| Teste | `npx vercel deploy` | teste (`hsmwaqpgxzqypzaiqewu`) | você, conferindo antes de subir |
+| Produção | `npx vercel deploy --prod` | real (`tpttfhkmuneecflsncja`) | usuários |
+
+**Local e teste nunca tocam em dados de usuário.** O `.env.local` aponta para o
+projeto de teste de propósito — se um dia você vir dados reais rodando
+localmente, algo está errado.
+
+As contas são separadas por projeto: a conta que você usa na produção não existe
+no ambiente de teste. Crie uma conta própria lá para os seus testes.
+
+Quando o schema mudar, rode a alteração **primeiro no teste**, valide, e só
+depois na produção.
+
 ## Para quem for assumir o projeto
 
 **Serviços envolvidos.** Três, todos no plano gratuito:
