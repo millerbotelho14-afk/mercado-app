@@ -91,6 +91,16 @@ export function closeDb(): void {
   currentUserId = null;
 }
 
+/**
+ * Remove o banco local de uma conta. Usado ao excluir a conta: apagar só na
+ * nuvem deixaria o histórico visível neste aparelho até alguém limpar o
+ * navegador.
+ */
+export async function deleteDbFor(userId: string): Promise<void> {
+  if (currentUserId === userId) closeDb();
+  await Dexie.delete(dbNameFor(userId));
+}
+
 /** Acesso ao banco da conta aberta. Só é chamado dentro da área logada. */
 export function db(): MercadoDB {
   if (!current) throw new Error('Nenhuma conta aberta.');

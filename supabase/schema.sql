@@ -73,3 +73,26 @@ create policy overrides_own on public.overrides
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- ── Excluir a própria conta ──────────────────────────────────────────────
+-- O navegador não pode remover um usuário: isso exige a chave secreta, que
+-- nunca sai do servidor. Esta função roda com permissão elevada
+-- (`security definer`), mas só consegue apagar quem a chamou — o `auth.uid()`
+-- vem do token, não de um parâmetro, então não dá para pedir a exclusão de
+-- outra pessoa. As compras e correções somem junto, pelo `on delete cascade`.
+create or replace function public.delete_own_account()
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'É preciso estar autenticado.';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_own_account() from public, anon;
+grant execute on function public.delete_own_account() to authenticated;

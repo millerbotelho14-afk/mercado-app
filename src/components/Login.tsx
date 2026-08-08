@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { signIn, signUp } from '../sync/auth';
+import { requestPasswordReset, signIn, signUp } from '../sync/auth';
+import CampoSenha from './CampoSenha';
 import { syncConfigured } from '../sync/client';
 import { useTheme } from '../lib/theme';
 
@@ -33,6 +34,26 @@ export default function Login() {
 
   const isSignUp = mode === 'up';
   const canSubmit = email.trim().length > 3 && password.length >= 6 && !busy;
+
+  async function handleReset() {
+    setError(null);
+    setMessage(null);
+    if (!email.trim()) {
+      setError('Escreva o seu e-mail acima e clique de novo.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await requestPasswordReset(email.trim());
+      setMessage(
+        'Enviamos um link para o seu e-mail. Abra por ele para escolher uma senha nova.',
+      );
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
@@ -151,20 +172,23 @@ export default function Login() {
                     placeholder="voce@email.com"
                   />
                 </div>
-                <div className="field">
-                  <label className="lb" htmlFor="lg-pass">
-                    Senha
-                  </label>
-                  <input
-                    id="lg-pass"
-                    className="in"
-                    type="password"
-                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={isSignUp ? 'pelo menos 6 caracteres' : ''}
-                  />
-                </div>
+                <CampoSenha
+                  id="lg-pass"
+                  label="Senha"
+                  value={password}
+                  onChange={setPassword}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  placeholder={isSignUp ? 'pelo menos 6 caracteres' : ''}
+                  onEnter={handleSubmit}
+                />
+
+                {!isSignUp && (
+                  <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 12 }}>
+                    <button type="button" className="link-btn" onClick={handleReset}>
+                      Esqueci minha senha
+                    </button>
+                  </div>
+                )}
 
                 {error && <div className="alert-price hi">{error}</div>}
                 {message && <div className="alert-price lo">{message}</div>}

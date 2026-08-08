@@ -14,6 +14,7 @@ import Busca from './components/Busca';
 import Historico from './components/Historico';
 import NovaCompra from './components/NovaCompra';
 import Conta from './components/Conta';
+import NovaSenha from './components/NovaSenha';
 
 const TABS = [
   { id: 'geral', icon: '📊', label: 'Visão Geral', short: 'Geral' },
@@ -26,7 +27,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id'] | 'conta';
 
 export default function App() {
-  const { session, loading } = useSession();
+  const { session, loading, recovering, finishRecovery } = useSession();
   const [tab, setTab] = useState<TabId>('geral');
   const [dbReady, setDbReady] = useState(false);
   const { toast, node: toastNode } = useToast();
@@ -86,6 +87,19 @@ export default function App() {
   }
 
   if (!session) return <Login />;
+
+  // Chegou pelo link de recuperação: a senha antiga ainda vale, e ela não a
+  // lembra. Definir a nova vem antes de qualquer outra coisa.
+  if (recovering) {
+    return (
+      <NovaSenha
+        onDone={() => {
+          finishRecovery();
+          toast('Senha alterada. Já pode usar a nova.');
+        }}
+      />
+    );
+  }
 
   if (!dbReady) {
     return (

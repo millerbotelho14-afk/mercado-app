@@ -1254,3 +1254,54 @@ tbody tr:last-child td {
   color: var(--mu);
   font-size: 13px;
 }
+
+/* ══ Campo de senha ═══════════════════════════════════ */
+.senha-wrap {
+  position: relative;
+}
+
+.senha-wrap .in {
+  padding-right: 44px;
+}
+
+.senha-olho {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.65;
+}
+
+.senha-olho:hover {
+  opacity: 1;
+  background: var(--card-alt);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--g);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.danger-zone {
+  border-color: var(--r);
+}
+
+.danger-zone .ct {
+  color: var(--r);
+}

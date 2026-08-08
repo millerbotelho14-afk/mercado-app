@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import {
   changePassword,
+  deleteOwnAccount,
   profileOf,
   saveProfile,
   signOut,
   type Profile,
 } from '../sync/auth';
+import { deleteDbFor } from '../db/schema';
+import CampoSenha from './CampoSenha';
 import { downloadJSON, exportJSON, importJSON } from '../db/repo';
 import { getSyncState, resetSyncCursor, runSync, type SyncResult } from '../sync/sync';
 import { todayISO } from '../lib/format';
@@ -36,6 +39,10 @@ export default function Conta({ session, purchaseCount, toast }: Props) {
   const [syncError, setSyncError] = useState<string | null>(null);
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [lastResult, setLastResult] = useState<SyncResult | null>(null);
+
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const { choice, setChoice } = useTheme();
@@ -91,6 +98,21 @@ export default function Conta({ session, purchaseCount, toast }: Props) {
       setSyncError((e as Error).message);
     } finally {
       setSyncBusy(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setExcluindo(true);
+    setErroExclusao(null);
+    try {
+      const userId = session.user.id;
+      await deleteOwnAccount();
+      // Só depois de a nuvem confirmar. Apagar aqui antes deixaria o aparelho
+      // vazio com a conta ainda existindo.
+      await deleteDbFor(userId);
+    } catch (e) {
+      setErroExclusao((e as Error).message);
+      setExcluindo(false);
     }
   }
 
@@ -259,20 +281,14 @@ export default function Conta({ session, purchaseCount, toast }: Props) {
 
       <div className="card">
         <div className="ct">Segurança</div>
-        <div className="field">
-          <label className="lb" htmlFor="ct-pass">
-            Nova senha
-          </label>
-          <input
-            id="ct-pass"
-            className="in"
-            type="password"
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="pelo menos 6 caracteres"
-          />
-        </div>
+        <CampoSenha
+          id="ct-pass"
+          label="Nova senha"
+          value={newPassword}
+          onChange={setNewPassword}
+          autoComplete="new-password"
+          placeholder="pelo menos 6 caracteres"
+        />
         <div className="row-actions">
           <button
             className="btn"
@@ -285,6 +301,44 @@ export default function Conta({ session, purchaseCount, toast }: Props) {
             Sair da conta
           </button>
         </div>
+      </div>
+
+      <div className="card danger-zone">
+        <div className="ct">Excluir a conta</div>
+        <p style={{ fontSize: 12.5, color: 'var(--mu)', marginTop: 0 }}>
+          Apaga a conta e <strong>todas as {purchaseCount} compras</strong>, na nuvem e neste
+          aparelho. É definitivo — não há como desfazer, e nem eu consigo recuperar depois.
+        </p>
+        <p style={{ fontSize: 12.5, color: 'var(--mu)' }}>
+          Se quiser guardar o histórico antes, use <strong>Exportar JSON</strong> acima.
+        </p>
+        <div className="field">
+          <label className="lb" htmlFor="ct-del">
+            Para confirmar, escreva <strong>EXCLUIR</strong> abaixo
+          </label>
+          <input
+            id="ct-del"
+            className="in"
+            value={confirmacaoExclusao}
+            onChange={(e) => setConfirmacaoExclusao(e.target.value)}
+            placeholder="EXCLUIR"
+            autoComplete="off"
+          />
+        </div>
+        {erroExclusao && <div className="alert-price hi">{erroExclusao}</div>}
+        <button
+          className="btn danger"
+          onClick={handleDeleteAccount}
+          disabled={confirmacaoExclusao.trim().toUpperCase() !== 'EXCLUIR' || excluindo}
+        >
+          {excluindo ? (
+            <>
+              <span className="spinner" /> Excluindo…
+            </>
+          ) : (
+            'Excluir minha conta e apagar tudo'
+          )}
+        </button>
       </div>
     </>
   );
