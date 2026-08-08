@@ -50,6 +50,7 @@ chaves — todo o resto depende de estar autenticado.
 | [CONTRIBUTING.md](CONTRIBUTING.md) | o ciclo de trabalho e as regras do domínio |
 | [docs/arquitetura.md](docs/arquitetura.md) | como funciona por dentro e por que assim |
 | [docs/operacao.md](docs/operacao.md) | serviços, ambientes, deploy, segurança |
+| [docs/backlog.md](docs/backlog.md) | o que ficou para depois, e por quê |
 
 ## Tecnologia
 
@@ -62,9 +63,5 @@ Quem garante que ninguém lê os dados de outro é o RLS, não o código do clie
 
 ## Próximos passos
 
-- Trocar o Recharts por SVG próprio nos dois gráficos: o bundle passa de 900 KB
-  e quase tudo é a biblioteca.
-- Ler o QR Code pela câmera dentro do app, em vez de colar o link.
-- Lista de compras com estimativa de custo, a partir do histórico de preços.
-- Política de privacidade e exclusão de conta — necessário antes de abrir o
-  cadastro para além de conhecidos.
+O que ficou para depois, com o motivo de cada adiamento, está em
+[docs/backlog.md](docs/backlog.md).
