@@ -36,6 +36,8 @@ Se algo quebrar em produção, não corra para consertar no susto: na Vercel, em
 *Deployments*, abra o anterior e clique em **Promote to Production**. Volta em
 segundos. Conserte com calma depois.
 
+Detalhes de ambientes, variáveis e deploy estão em [docs/operacao.md](docs/operacao.md).
+
 ## Regras que valem sempre
 
 **Toda correção de bug ganha um teste.** É o que impede o mesmo erro de voltar.
