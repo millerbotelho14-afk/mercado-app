@@ -1,0 +1,36 @@
+name: CI
+
+# Roda a cada envio e a cada pull request. A ideia é simples: nada chega em
+# produção sem que os tipos batam, os testes passem e o app compile.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Mesma versão que a Vercel usa no build de produção.
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Testes
+        run: npm test
+
+      - name: Build
+        run: npx vite build
+        env:
+          # Valores de fachada: o build só precisa que existam. As chaves de
+          # verdade ficam na Vercel, nunca no repositório.
+          VITE_SUPABASE_URL: https://exemplo.supabase.co
+          VITE_SUPABASE_KEY: sb_publishable_ci
