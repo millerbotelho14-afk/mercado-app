@@ -17,6 +17,66 @@ Abre em <http://localhost:5180> (e na rede local, para testar no celular).
 Sem as variáveis do Supabase o app sobe, mas a tela de login avisa que faltam as
 chaves — todo o resto depende de estar autenticado.
 
+## Como testar uma mudança antes de subir para produção
+
+Três camadas, da mais rápida para a mais próxima do real. Use a mais barata que
+responda a sua dúvida.
+
+**1. Na sua máquina** — o laço mais curto, e onde 90% das dúvidas se resolvem:
+
+```bash
+git checkout -b feature/nome-da-mudanca
+npm run dev
+```
+
+Abre em <http://localhost:5180> e também na rede local, então dá para testar no
+celular pelo endereço `http://SEU-IP:5180` sem publicar nada.
+
+**2. Conferir se compila** — pega erro de tipo antes de a Vercel pegar:
+
+```bash
+npm run build
+```
+
+**3. Publicar uma versão de teste** — mesma infraestrutura da produção, endereço
+próprio, sem tocar no site que está no ar:
+
+```bash
+npx vercel deploy --yes
+```
+
+Devolve uma URL do tipo `mercado-<hash>-rellim.vercel.app`. Ela é independente:
+você abre, testa no celular, manda para alguém ver. A produção continua intacta.
+
+**Subir para produção**, quando estiver satisfeito:
+
+```bash
+git checkout main
+git merge feature/nome-da-mudanca
+git push
+npx vercel deploy --prod --yes
+```
+
+> **Atenção — a versão de teste usa o banco de verdade.** As variáveis de
+> ambiente de Preview apontam para o mesmo projeto Supabase da produção. Testar
+> a interface é seguro; **cadastrar, importar ou excluir compras numa versão de
+> teste mexe nos seus dados reais**, e uma alteração no schema afeta o site no
+> ar na hora.
+>
+> Enquanto for uso pessoal, dá para conviver com isso tomando cuidado. Se o app
+> crescer ou entrar outra pessoa mexendo, crie um segundo projeto no Supabase
+> (o plano gratuito permite dois), rode o `supabase/schema.sql` nele e aponte as
+> variáveis de Preview para lá:
+>
+> ```bash
+> npx vercel env rm VITE_SUPABASE_URL preview
+> printf 'https://PROJETO-DE-TESTE.supabase.co' | npx vercel env add VITE_SUPABASE_URL preview
+> ```
+
+**Se der errado em produção**, a Vercel guarda todos os deploys: em *Deployments*,
+abra o anterior e use *Promote to Production*. Volta em segundos, sem precisar
+mexer no código.
+
 ## Para quem for assumir o projeto
 
 **Serviços envolvidos.** Três, todos no plano gratuito:
